@@ -29,6 +29,9 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Updated login credentials to use repairbros.in domain (admin@repairbros.in, yash@repairbros.in)
 - [x] Redesigned parts request form for internal technicians (no customer contact info needed)
 - [x] Added Tailwind config with proper primary color definition to fix white button styling
+- [x] Implemented full admin dashboard with parts requests management, approve/reject functionality
+- [x] Added alert dialog notification for new parts requests
+- [x] Added notification sound using Web Audio API when new requests arrive
 
 ## Current Structure
 

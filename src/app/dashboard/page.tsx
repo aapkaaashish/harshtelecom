@@ -3,10 +3,164 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
+// Mock parts requests data
+interface PartsRequest {
+  id: string;
+  technicianName: string;
+  technicianEmail: string;
+  partType: string;
+  quantity: number;
+  urgency: 'low' | 'normal' | 'urgent';
+  notes: string;
+  status: 'pending' | 'approved' | 'rejected' | 'delivered';
+  requestTime: string;
+  adminNotes?: string;
+}
+
+const mockRequests: PartsRequest[] = [
+  {
+    id: 'PRT-12345678',
+    technicianName: 'Yash',
+    technicianEmail: 'yash@repairbros.in',
+    partType: 'screen-iphone',
+    quantity: 2,
+    urgency: 'normal',
+    notes: 'Need for iPhone 14 Pro repairs',
+    status: 'pending',
+    requestTime: '2026-05-04T19:30:00Z',
+  },
+  {
+    id: 'PRT-87654321',
+    technicianName: 'Yash',
+    technicianEmail: 'yash@repairbros.in',
+    partType: 'backpanel-iphone',
+    quantity: 1,
+    urgency: 'urgent',
+    notes: 'Customer waiting, urgent repair needed',
+    status: 'approved',
+    requestTime: '2026-05-04T18:15:00Z',
+    adminNotes: 'Approved - $45 each, available in stock',
+  },
+  {
+    id: 'PRT-11223344',
+    technicianName: 'Yash',
+    technicianEmail: 'yash@repairbros.in',
+    partType: 'battery',
+    quantity: 3,
+    urgency: 'low',
+    notes: 'Regular stock replenishment',
+    status: 'rejected',
+    requestTime: '2026-05-04T17:00:00Z',
+    adminNotes: 'Out of stock - will be available next week',
+  },
+];
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [requests, setRequests] = useState<PartsRequest[]>(mockRequests);
+  const [selectedRequest, setSelectedRequest] = useState<PartsRequest | null>(null);
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [newRequestsCount, setNewRequestsCount] = useState(0);
+  const [hasPlayedSound, setHasPlayedSound] = useState(false);
+
+  // Function to play notification sound
+  const playNotificationSound = () => {
+    try {
+      // Create a simple beep sound using Web Audio API
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800Hz beep
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (error) {
+      console.log('Web Audio API not supported or failed:', error);
+    }
+  };
+
+  // Check for new pending requests and trigger notifications
+  useEffect(() => {
+    const pendingRequests = requests.filter(r => r.status === 'pending');
+    const newCount = pendingRequests.length;
+
+    if (newCount > 0 && !hasPlayedSound) {
+      // Play notification sound
+      playNotificationSound();
+
+      // Show alert dialog for new requests
+      setShowAlertDialog(true);
+      setHasPlayedSound(true);
+    }
+
+    setNewRequestsCount(newCount);
+  }, [requests, hasPlayedSound]);
+
+  const handleApproveRequest = (requestId: string, notes: string) => {
+    setRequests(prev => prev.map(req =>
+      req.id === requestId
+        ? { ...req, status: 'approved', adminNotes: notes }
+        : req
+    ));
+    setSelectedRequest(null);
+  };
+
+  const handleRejectRequest = (requestId: string, notes: string) => {
+    setRequests(prev => prev.map(req =>
+      req.id === requestId
+        ? { ...req, status: 'rejected', adminNotes: notes }
+        : req
+    ));
+    setSelectedRequest(null);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'delivered': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
+      case 'urgent': return 'text-red-600 font-semibold';
+      case 'normal': return 'text-blue-600';
+      case 'low': return 'text-gray-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getPartDisplayName = (partType: string) => {
+    const parts: { [key: string]: string } = {
+      'screen-iphone': 'iPhone Screen Assembly',
+      'screen-samsung': 'Samsung Screen Assembly',
+      'screen-google': 'Google Pixel Screen',
+      'backpanel-iphone': 'iPhone Back Panel/Frame',
+      'backpanel-samsung': 'Samsung Back Panel',
+      'battery': 'Battery',
+      'charging-port': 'Charging Port Assembly',
+      'speaker': 'Speaker Assembly',
+      'camera': 'Camera Module',
+      'motherboard': 'Motherboard',
+      'other': 'Other Parts',
+    };
+    return parts[partType] || partType;
+  };
 
   if (status === 'loading') {
     return (
@@ -38,6 +192,11 @@ export default function DashboardPage() {
                 Admin Dashboard
               </h1>
               <div className="flex items-center space-x-3">
+                {newRequestsCount > 0 && (
+                  <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
+                    {newRequestsCount} New Request{newRequestsCount > 1 ? 's' : ''}
+                  </span>
+                )}
                 <span className="text-sm text-gray-600">
                   Welcome, {session.user?.name}
                 </span>
@@ -49,134 +208,258 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-            
-            <p className="mb-6 text-lg text-gray-700">
-              Manage smartphones, mobile repair parts, and accessories inventory
-            </p>
-            
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Inventory Management Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M9 12h6m2 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Inventory Management</h3>
-                      <p className="text-sm text-gray-600">
-                        Track and manage smartphones, parts, and accessories stock levels
-                      </p>
-                    </div>
-                  </div>
-                </div>
+
+            <div className="mb-6">
+              <p className="text-lg text-gray-700 mb-4">
+                Manage parts requests from technicians
+              </p>
+            </div>
+
+            {/* Parts Requests Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Parts Requests</h2>
+                <p className="text-sm text-gray-600">Review and manage technician parts requests</p>
               </div>
-              
-              {/* Order Processing Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zm0 10c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Order Processing</h3>
-                      <p className="text-sm text-gray-600">
-                        Process repair orders and track their completion status
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* User Management Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 008 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">User Management</h3>
-                      <p className="text-sm text-gray-600">
-                        Manage technician and customer accounts and permissions
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Reports Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M9 5h7a2 2 0 012 2v12a2 2 0 01-2 2H9a2 2 0 01-2-2V7a2 2 0 012-2zm0 0v2a2 2 0 00-2 2h-.092c-.386.09-.76.185-1.11.28a9.868 9.868 0 00-2.89.824A9.898 9.898 0 003 19.242a9.868 9.868 0 001.473 3.411l.23.084a9.904 9.904 0 002.44-.05 9.893 9.893 0 004.93-1.418 9.891 9.891 0 002.174-.693V7a2 2 0 012-2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Reports & Analytics</h3>
-                      <p className="text-sm text-gray-600">
-                        View sales, repair trends, and performance metrics
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Parts Catalog Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M9 12l2 2 4-4M7.5 21h9a2.5 2.5 0 002.5-2.5V12" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Parts Catalog</h3>
-                      <p className="text-sm text-gray-600">
-                        Browse and manage mobile repair parts and accessories inventory
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Settings Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M10.325 9.325c.447-1.377 1.946-2.272 3.34-2.077 1.395.194 2.433 1.284 2.286 2.68a11.018 11.018 0 01-2.333 1.816c-.646-.036-1.271-.157-1.865-.337zM15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">System Settings</h3>
-                      <p className="text-sm text-gray-600">
-                        Configure application preferences and integrations
-                      </p>
-                    </div>
-                  </div>
-                </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Request ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Technician
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Part
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Quantity
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Urgency
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {requests.map((request) => (
+                      <tr key={request.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                          {request.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {request.technicianName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {request.technicianEmail}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {getPartDisplayName(request.partType)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {request.quantity} pcs
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`text-sm font-medium ${getUrgencyColor(request.urgency)}`}>
+                            {request.urgency.charAt(0).toUpperCase() + request.urgency.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(request.status)}`}>
+                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(request.requestTime).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => setSelectedRequest(request)}
+                            className="text-blue-600 hover:text-blue-900 transition-colors"
+                          >
+                            View
+                          </button>
+                          {request.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleApproveRequest(request.id, 'Approved - Available in stock')}
+                                className="text-green-600 hover:text-green-900 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleRejectRequest(request.id, 'Out of stock')}
+                                className="text-red-600 hover:text-red-900 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Alert Dialog for New Requests */}
+        {showAlertDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0 h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                            d="M15 17h5l-5 5v-5zM4.868 12.683A17.925 17.925 0 0112 21c7.962 0 12.21-8.164 8.09-14.827l-.162-.303m0 0l.162.303a17.926 17.926 0 01-1.417 2.684M4.868 12.683L12 3l7.132 9.683M12 3v18" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-lg font-medium text-gray-900">New Parts Request</h3>
+                    <p className="text-sm text-gray-500">
+                      You have {newRequestsCount} pending request{newRequestsCount > 1 ? 's' : ''} to review
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowAlertDialog(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={() => setShowAlertDialog(false)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    Review Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Request Details Modal */}
+        {selectedRequest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Request Details - {selectedRequest.id}
+                  </h3>
+                  <button
+                    onClick={() => setSelectedRequest(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Technician</label>
+                      <p className="text-sm text-gray-900">{selectedRequest.technicianName}</p>
+                      <p className="text-sm text-gray-500">{selectedRequest.technicianEmail}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Request Time</label>
+                      <p className="text-sm text-gray-900">
+                        {new Date(selectedRequest.requestTime).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Type</label>
+                      <p className="text-sm text-gray-900">{getPartDisplayName(selectedRequest.partType)}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                      <p className="text-sm text-gray-900">{selectedRequest.quantity} pieces</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Urgency</label>
+                    <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getUrgencyColor(selectedRequest.urgency) === 'text-red-600 font-semibold' ? 'bg-red-100 text-red-800' : getUrgencyColor(selectedRequest.urgency) === 'text-blue-600' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {selectedRequest.urgency.charAt(0).toUpperCase() + selectedRequest.urgency.slice(1)}
+                    </span>
+                  </div>
+
+                  {selectedRequest.notes && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Technician Notes</label>
+                      <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedRequest.notes}</p>
+                    </div>
+                  )}
+
+                  {selectedRequest.adminNotes && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Admin Notes</label>
+                      <p className="text-sm text-gray-900 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        {selectedRequest.adminNotes}
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedRequest.status)}`}>
+                      {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={() => setSelectedRequest(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                  {selectedRequest.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleRejectRequest(selectedRequest.id, 'Request rejected by admin')}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => handleApproveRequest(selectedRequest.id, 'Approved - Available for pickup')}
+                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                      >
+                        Approve
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
