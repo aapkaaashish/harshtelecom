@@ -23,6 +23,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Added sign out functionality
 - [x] Fixed React Context error in Server Components by moving SessionProvider to client-only component
 - [x] Fixed NextAuth route handler for Next.js 16 compatibility
+- [x] Created proper home page with landing UI instead of black screen
 
 ## Current Structure
 
