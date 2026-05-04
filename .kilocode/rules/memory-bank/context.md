@@ -21,6 +21,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Added TypeScript types for NextAuth to support role-based access
 - [x] Improved loading states and error handling
 - [x] Added sign out functionality
+- [x] Fixed React Context error in Server Components by moving SessionProvider to client-only component
 
 ## Current Structure
 
