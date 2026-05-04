@@ -32,42 +32,53 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Check if email and password are provided
-        if (!credentials?.email || !credentials?.password) {
+        try {
+          // Check if email and password are provided
+          if (!credentials?.email || !credentials?.password) {
+            console.log('Missing credentials');
+            return null;
+          }
+
+          // Find user by email
+          const user = users.find(u => u.email === credentials.email);
+
+          if (!user) {
+            console.log('User not found:', credentials.email);
+            return null;
+          }
+
+          // Check password
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isValid) {
+            console.log('Invalid password for user:', credentials.email);
+            return null;
+          }
+
+          console.log('Login successful for:', credentials.email);
+          // Return user object
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error('Authorization error:', error);
           return null;
         }
-
-        // Find user by email
-        const user = users.find(u => u.email === credentials.email);
-
-        if (!user) {
-          // No user found
-          return null;
-        }
-
-        // Check password
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isValid) {
-          // Invalid password
-          return null;
-        }
-
-        // Return user object
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
       }
     })
   ],
   pages: {
     signIn: '/login', // Custom sign-in page
+  },
+  session: {
+    strategy: "jwt" as const,
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: any }) {
@@ -84,7 +95,9 @@ export const authOptions = {
       }
       return session;
     }
-  }
+  },
+  debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development',
 };
 
 const handler = NextAuth(authOptions);

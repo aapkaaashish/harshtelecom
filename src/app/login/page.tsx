@@ -111,12 +111,19 @@ export default function LoginPage() {
             </p>
           )}
 
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Don&apos;t have an account?
-            <a href="#" className="font-medium text-primary hover:text-primary/80 transition-colors duration-200">
-              Sign up
-            </a>
-          </p>
+          <div className="mt-6 text-center space-y-2">
+            <p className="text-sm text-gray-500">
+              Don&apos;t have an account?
+              <a href="#" className="font-medium text-primary hover:text-primary/80 transition-colors duration-200 ml-1">
+                Sign up
+              </a>
+            </p>
+            <p className="text-sm text-gray-400">
+              <a href="/debug" className="hover:text-gray-600 transition-colors duration-200">
+                Debug Info
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
