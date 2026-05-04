@@ -4,68 +4,18 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-
-// Mock parts requests data
-interface PartsRequest {
-  id: string;
-  technicianName: string;
-  technicianEmail: string;
-  partType: string;
-  quantity: number;
-  urgency: 'low' | 'normal' | 'urgent';
-  notes: string;
-  status: 'pending' | 'approved' | 'rejected' | 'delivered';
-  requestTime: string;
-  adminNotes?: string;
-}
-
-const mockRequests: PartsRequest[] = [
-  {
-    id: 'PRT-12345678',
-    technicianName: 'Yash',
-    technicianEmail: 'yash@repairbros.in',
-    partType: 'screen-iphone',
-    quantity: 2,
-    urgency: 'normal',
-    notes: 'Need for iPhone 14 Pro repairs',
-    status: 'pending',
-    requestTime: '2026-05-04T19:30:00Z',
-  },
-  {
-    id: 'PRT-87654321',
-    technicianName: 'Yash',
-    technicianEmail: 'yash@repairbros.in',
-    partType: 'backpanel-iphone',
-    quantity: 1,
-    urgency: 'urgent',
-    notes: 'Customer waiting, urgent repair needed',
-    status: 'approved',
-    requestTime: '2026-05-04T18:15:00Z',
-    adminNotes: 'Approved - $45 each, available in stock',
-  },
-  {
-    id: 'PRT-11223344',
-    technicianName: 'Yash',
-    technicianEmail: 'yash@repairbros.in',
-    partType: 'battery',
-    quantity: 3,
-    urgency: 'low',
-    notes: 'Regular stock replenishment',
-    status: 'rejected',
-    requestTime: '2026-05-04T17:00:00Z',
-    adminNotes: 'Out of stock - will be available next week',
-  },
-];
+import { usePartsRequests } from '../../contexts/parts-requests-context';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { requests, updateRequestStatus, getPendingCount } = usePartsRequests();
 
-  const [requests, setRequests] = useState<PartsRequest[]>(mockRequests);
-  const [selectedRequest, setSelectedRequest] = useState<PartsRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [newRequestsCount, setNewRequestsCount] = useState(0);
   const [hasPlayedSound, setHasPlayedSound] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
 
   // Function to play notification sound
   const playNotificationSound = () => {
@@ -93,8 +43,7 @@ export default function DashboardPage() {
 
   // Check for new pending requests and trigger notifications
   useEffect(() => {
-    const pendingRequests = requests.filter(r => r.status === 'pending');
-    const newCount = pendingRequests.length;
+    const newCount = getPendingCount();
 
     if (newCount > 0 && !hasPlayedSound) {
       // Play notification sound
@@ -106,24 +55,18 @@ export default function DashboardPage() {
     }
 
     setNewRequestsCount(newCount);
-  }, [requests, hasPlayedSound]);
+  }, [requests, hasPlayedSound, getPendingCount]);
 
-  const handleApproveRequest = (requestId: string, notes: string) => {
-    setRequests(prev => prev.map(req =>
-      req.id === requestId
-        ? { ...req, status: 'approved', adminNotes: notes }
-        : req
-    ));
+  const handleApproveRequest = (requestId: string) => {
+    updateRequestStatus(requestId, 'approved', adminNotes || 'Approved - Available for pickup');
     setSelectedRequest(null);
+    setAdminNotes('');
   };
 
-  const handleRejectRequest = (requestId: string, notes: string) => {
-    setRequests(prev => prev.map(req =>
-      req.id === requestId
-        ? { ...req, status: 'rejected', adminNotes: notes }
-        : req
-    ));
+  const handleRejectRequest = (requestId: string) => {
+    updateRequestStatus(requestId, 'rejected', adminNotes || 'Request rejected by admin');
     setSelectedRequest(null);
+    setAdminNotes('');
   };
 
   const getStatusColor = (status: string) => {
@@ -295,16 +238,10 @@ export default function DashboardPage() {
                           {request.status === 'pending' && (
                             <>
                               <button
-                                onClick={() => handleApproveRequest(request.id, 'Approved - Available in stock')}
+                                onClick={() => setSelectedRequest(request)}
                                 className="text-green-600 hover:text-green-900 transition-colors"
                               >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => handleRejectRequest(request.id, 'Out of stock')}
-                                className="text-red-600 hover:text-red-900 transition-colors"
-                              >
-                                Reject
+                                Review
                               </button>
                             </>
                           )}
@@ -440,20 +377,34 @@ export default function DashboardPage() {
                     Close
                   </button>
                   {selectedRequest.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => handleRejectRequest(selectedRequest.id, 'Request rejected by admin')}
-                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        onClick={() => handleApproveRequest(selectedRequest.id, 'Approved - Available for pickup')}
-                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-                      >
-                        Approve
-                      </button>
-                    </>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Admin Notes (Optional)
+                        </label>
+                        <textarea
+                          value={adminNotes}
+                          onChange={(e) => setAdminNotes(e.target.value)}
+                          placeholder="Add notes for approval/rejection (e.g., pricing, availability, reasons)"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          onClick={() => handleRejectRequest(selectedRequest.id)}
+                          className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                        >
+                          Reject Request
+                        </button>
+                        <button
+                          onClick={() => handleApproveRequest(selectedRequest.id)}
+                          className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                        >
+                          Approve Request
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

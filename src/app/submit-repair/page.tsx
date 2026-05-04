@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { usePartsRequests } from "../../contexts/parts-requests-context";
 
 export default function SubmitRepairPage() {
   const { data: session } = useSession();
+  const { addRequest } = usePartsRequests();
   const [formData, setFormData] = useState({
     partType: '',
     quantity: 1,
@@ -28,14 +30,28 @@ export default function SubmitRepairPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Add request to global state
+      const newRequest = {
+        technicianName: session?.user?.name || 'Unknown',
+        technicianEmail: session?.user?.email || '',
+        partType: formData.partType,
+        quantity: formData.quantity,
+        urgency: formData.urgency as 'low' | 'normal' | 'urgent',
+        notes: formData.notes,
+      };
 
-    // Generate a mock request ID
-    const id = 'PRT-' + Date.now().toString().slice(-8);
-    setRequestId(id);
-    setIsSubmitted(true);
-    setIsSubmitting(false);
+      addRequest(newRequest);
+
+      // Generate request ID for confirmation
+      const id = 'PRT-' + Date.now().toString().slice(-8);
+      setRequestId(id);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Failed to submit request:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {

@@ -32,6 +32,9 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Implemented full admin dashboard with parts requests management, approve/reject functionality
 - [x] Added alert dialog notification for new parts requests
 - [x] Added notification sound using Web Audio API when new requests arrive
+- [x] Created global parts requests context with localStorage persistence for real-time data sharing
+- [x] Admin can now add custom notes when approving/rejecting requests
+- [x] Real-time synchronization between user submissions and admin dashboard
 
 ## Current Structure
 
