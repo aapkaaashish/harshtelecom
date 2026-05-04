@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePartsRequests } from '../../contexts/parts-requests-context';
 
 export default function DashboardPage() {
@@ -14,7 +14,7 @@ export default function DashboardPage() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [newRequestsCount, setNewRequestsCount] = useState(0);
-  const [hasPlayedSound, setHasPlayedSound] = useState(false);
+  const hasPlayedSound = useRef(false);
   const [adminNotes, setAdminNotes] = useState('');
 
   // Function to play notification sound
@@ -45,17 +45,18 @@ export default function DashboardPage() {
   useEffect(() => {
     const newCount = getPendingCount();
 
-    if (newCount > 0 && !hasPlayedSound) {
+    if (newCount > 0 && !hasPlayedSound.current) {
       // Play notification sound
       playNotificationSound();
 
       // Show alert dialog for new requests
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowAlertDialog(true);
-      setHasPlayedSound(true);
+      hasPlayedSound.current = true;
     }
 
     setNewRequestsCount(newCount);
-  }, [requests, hasPlayedSound, getPendingCount]);
+  }, [requests, getPendingCount]);
 
   const handleApproveRequest = (requestId: string) => {
     updateRequestStatus(requestId, 'approved', adminNotes || 'Approved - Available for pickup');

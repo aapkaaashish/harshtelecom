@@ -73,7 +73,7 @@ export default function MyRequestsPage() {
                   No Requests Yet
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  You haven't submitted any parts requests yet. Submit your first request to get started.
+                  You haven&apos;t submitted any parts requests yet. Submit your first request to get started.
                 </p>
                 <Link
                   href="/submit-repair"
