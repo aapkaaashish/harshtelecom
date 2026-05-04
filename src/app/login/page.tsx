@@ -42,10 +42,10 @@ export default function LoginPage() {
         <div className="w-full space-y-8 overflow-hidden">
           <div className="space-y-6 text-center">
             <h2 className="text-3xl font-bold text-gray-900">
-              Mobile Repair Hub
+              Harsh Telecom
             </h2>
             <p className="text-lg text-gray-600">
-              Sign in to manage your repair requests and inventory
+              Sign in to access the technician portal and manage parts requests
             </p>
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>

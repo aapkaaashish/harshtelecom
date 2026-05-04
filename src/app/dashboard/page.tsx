@@ -133,7 +133,7 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-3xl font-bold text-gray-900">
-                Admin Dashboard
+                Harsh Telecom - Admin Dashboard
               </h1>
               <div className="flex items-center space-x-3">
                 {newRequestsCount > 0 && (
@@ -155,15 +155,15 @@ export default function DashboardPage() {
 
             <div className="mb-6">
               <p className="text-lg text-gray-700 mb-4">
-                Manage parts requests from technicians
+                Manage repair parts requests and technician submissions at Harsh Telecom
               </p>
             </div>
 
             {/* Parts Requests Table */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">Parts Requests</h2>
-                <p className="text-sm text-gray-600">Review and manage technician parts requests</p>
+                <h2 className="text-xl font-semibold text-gray-900">Repair Parts Requests</h2>
+                <p className="text-sm text-gray-600">Review and manage technician parts requests at Harsh Telecom</p>
               </div>
 
               <div className="overflow-x-auto">
@@ -468,10 +468,10 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-8 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">
-              User Dashboard
-            </h1>
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-3xl font-bold text-gray-900">
+                Harsh Telecom - Technician Portal
+              </h1>
             <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-600">
                 Welcome, {session.user?.name}
@@ -486,7 +486,7 @@ export default function DashboardPage() {
           </div>
           
           <p className="mb-6 text-lg text-gray-700">
-            Submit repair requests and check their status
+            Submit repair parts requests and track their approval status at Harsh Telecom
           </p>
           
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -502,9 +502,9 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Submit Repair Request</h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">Request Parts</h3>
                       <p className="text-sm text-gray-600">
-                        Report a smartphone issue and get a repair estimate
+                        Submit parts request for customer device repairs
                       </p>
                     </div>
                   </div>
@@ -524,9 +524,9 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">My Requests</h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">My Parts Requests</h3>
                       <p className="text-sm text-gray-600">
-                        Track the status of your repair requests
+                        Track the status of your parts requests
                       </p>
                     </div>
                   </div>
@@ -546,9 +546,9 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Check Parts</h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">Parts Availability</h3>
                       <p className="text-sm text-gray-600">
-                        Verify availability of repair parts before submission
+                        Check current inventory and parts availability
                       </p>
                     </div>
                   </div>
@@ -568,9 +568,9 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Contact Support</h3>
+                      <h3 className="font-semibold text-gray-900 mb-2">Support Center</h3>
                       <p className="text-sm text-gray-600">
-                        Get help with your repair requests or account issues
+                        Get assistance with parts requests and technical support
                       </p>
                     </div>
                   </div>

@@ -55,7 +55,7 @@ export default function MyRequestsPage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-gray-900">
-              My Parts Requests
+              Harsh Telecom - My Parts Requests
             </h1>
             <Link
               href="/dashboard"
@@ -70,10 +70,10 @@ export default function MyRequestsPage() {
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📋</div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  No Requests Yet
+                  No Parts Requests Yet
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  You haven&apos;t submitted any parts requests yet. Submit your first request to get started.
+                  You haven&apos;t submitted any parts requests yet. Start by requesting parts for your repairs at Harsh Telecom.
                 </p>
                 <Link
                   href="/submit-repair"
@@ -88,7 +88,7 @@ export default function MyRequestsPage() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
-                    Your Requests ({userRequests.length})
+                    Your Parts Requests ({userRequests.length})
                   </h2>
                   <Link
                     href="/submit-repair"

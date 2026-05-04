@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mobile Repair Parts & Accessories",
-  description: "An app for sending repair data to admin dashboard",
+  title: "Harsh Telecom - Professional Mobile Repair Services",
+  description: "Leading mobile repair services with expert technicians, premium parts, and dedicated customer support",
 };
 
 export default function RootLayout({
