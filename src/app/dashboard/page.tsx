@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -208,84 +209,92 @@ export default function DashboardPage() {
           
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Submit Repair Request Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-              <div className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zm0 10c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Submit Repair Request</h3>
-                    <p className="text-sm text-gray-600">
-                      Report a smartphone issue and get a repair estimate
-                    </p>
+            <Link href="/submit-repair">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer">
+                <div className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zm0 10c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Submit Repair Request</h3>
+                      <p className="text-sm text-gray-600">
+                        Report a smartphone issue and get a repair estimate
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
             
             {/* My Requests Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-              <div className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h5a2 2 0 002-2M9 5a2 2 0 012-2h5a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">My Requests</h3>
-                    <p className="text-sm text-gray-600">
-                      Track the status of your repair requests
-                    </p>
+            <Link href="/my-requests">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer">
+                <div className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h5a2 2 0 002-2M9 5a2 2 0 012-2h5a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">My Requests</h3>
+                      <p className="text-sm text-gray-600">
+                        Track the status of your repair requests
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
             
             {/* Check Parts Availability Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-              <div className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M9 12l2 2 4-4M7.5 21h9a2.5 2.5 0 002.5-2.5V12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Check Parts</h3>
-                    <p className="text-sm text-gray-600">
-                      Verify availability of repair parts before submission
-                    </p>
+            <Link href="/check-parts">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer">
+                <div className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M9 12l2 2 4-4M7.5 21h9a2.5 2.5 0 002.5-2.5V12" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Check Parts</h3>
+                      <p className="text-sm text-gray-600">
+                        Verify availability of repair parts before submission
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
             
             {/* Contact Support Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300">
-              <div className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M20.844 6.15a.924.924 0 00-.268-.41l-.28-1.028a1.14 1.14 0 00-1.018-.88H6.832a1.14 1.14 0 00-1.018.88l-.28 1.028a.924.924 0 00-.268.41M12 14l9-5-9-5-9 5 9 5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Contact Support</h3>
-                    <p className="text-sm text-gray-600">
-                      Get help with your repair requests or account issues
-                    </p>
+            <Link href="/contact-support">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer">
+                <div className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 h-10 w-10 rounded bg-primary/10 text-primary flex items-center justify-center">
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M20.844 6.15a.924.924 0 00-.268-.41l-.28-1.028a1.14 1.14 0 00-1.018-.88H6.832a1.14 1.14 0 00-1.018.88l-.28 1.028a.924.924 0 00-.268.41M12 14l9-5-9-5-9 5 9 5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Contact Support</h3>
+                      <p className="text-sm text-gray-600">
+                        Get help with your repair requests or account issues
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
