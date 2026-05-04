@@ -22,49 +22,13 @@ interface PartsRequestsContextType {
   addRequest: (request: Omit<PartsRequest, 'id' | 'status' | 'requestTime'>) => void;
   updateRequestStatus: (id: string, status: PartsRequest['status'], adminNotes?: string) => void;
   getPendingCount: () => number;
+  clearAllRequests: () => void;
 }
 
 const PartsRequestsContext = createContext<PartsRequestsContextType | undefined>(undefined);
 
-const initialRequests: PartsRequest[] = [
-  {
-    id: 'PRT-12345678',
-    technicianName: 'Yash',
-    technicianEmail: 'yash@repairbros.in',
-    partType: 'screen-iphone',
-    quantity: 2,
-    urgency: 'normal',
-    notes: 'Need for iPhone 14 Pro repairs',
-    status: 'pending',
-    requestTime: '2026-05-04T19:30:00Z',
-  },
-  {
-    id: 'PRT-87654321',
-    technicianName: 'Yash',
-    technicianEmail: 'yash@repairbros.in',
-    partType: 'backpanel-iphone',
-    quantity: 1,
-    urgency: 'urgent',
-    notes: 'Customer waiting, urgent repair needed',
-    status: 'approved',
-    requestTime: '2026-05-04T18:15:00Z',
-    adminNotes: 'Approved - $45 each, available in stock',
-    approvedTime: '2026-05-04T18:30:00Z',
-  },
-  {
-    id: 'PRT-11223344',
-    technicianName: 'Yash',
-    technicianEmail: 'yash@repairbros.in',
-    partType: 'battery',
-    quantity: 3,
-    urgency: 'low',
-    notes: 'Regular stock replenishment',
-    status: 'rejected',
-    requestTime: '2026-05-04T17:00:00Z',
-    adminNotes: 'Out of stock - will be available next week',
-    rejectedTime: '2026-05-04T17:15:00Z',
-  },
-];
+// Initial mock data - will be replaced by real submissions
+const initialRequests: PartsRequest[] = [];
 
 export function PartsRequestsProvider({ children }: { children: ReactNode }) {
   const [requests, setRequests] = useState<PartsRequest[]>(() => {
@@ -73,18 +37,22 @@ export function PartsRequestsProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem('partsRequests');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          console.log('Loaded parts requests from localStorage:', parsed);
+          return parsed;
         } catch (e) {
           console.error('Failed to parse saved requests:', e);
         }
       }
     }
+    console.log('Using initial empty requests array');
     return initialRequests;
   });
 
   // Save to localStorage whenever requests change
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      console.log('Saving requests to localStorage:', requests);
       localStorage.setItem('partsRequests', JSON.stringify(requests));
     }
   }, [requests]);
@@ -97,7 +65,12 @@ export function PartsRequestsProvider({ children }: { children: ReactNode }) {
       requestTime: new Date().toISOString(),
     };
 
-    setRequests(prev => [request, ...prev]);
+    console.log('Adding new parts request:', request);
+    setRequests(prev => {
+      const newRequests = [request, ...prev];
+      console.log('Updated requests array:', newRequests);
+      return newRequests;
+    });
   };
 
   const updateRequestStatus = (id: string, status: PartsRequest['status'], adminNotes?: string) => {
@@ -124,12 +97,21 @@ export function PartsRequestsProvider({ children }: { children: ReactNode }) {
     return requests.filter(r => r.status === 'pending').length;
   };
 
+  const clearAllRequests = () => {
+    console.log('Clearing all requests');
+    setRequests([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('partsRequests');
+    }
+  };
+
   return (
     <PartsRequestsContext.Provider value={{
       requests,
       addRequest,
       updateRequestStatus,
       getPendingCount,
+      clearAllRequests,
     }}>
       {children}
     </PartsRequestsContext.Provider>

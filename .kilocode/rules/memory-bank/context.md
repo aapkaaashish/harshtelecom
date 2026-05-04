@@ -35,6 +35,8 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Created global parts requests context with localStorage persistence for real-time data sharing
 - [x] Admin can now add custom notes when approving/rejecting requests
 - [x] Real-time synchronization between user submissions and admin dashboard
+- [x] Removed mock data - admin now sees real user submissions only
+- [x] Added debug panel for admin to monitor data and clear requests
 
 ## Current Structure
 
