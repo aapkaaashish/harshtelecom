@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "next": "^16.1.3",
+    "next-auth": "^4.24.14",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
