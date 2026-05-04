@@ -290,12 +290,14 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                <p className="text-sm text-yellow-800">
-                  <strong>Debug Info:</strong> Check browser console (F12) for detailed logging.
-                  User submissions should appear here automatically when using the same browser/device.
-                </p>
-              </div>
+              {requests.length === 0 && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>No requests yet.</strong> User submissions will appear here automatically.
+                    Try submitting a parts request as a technician to see it appear here.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

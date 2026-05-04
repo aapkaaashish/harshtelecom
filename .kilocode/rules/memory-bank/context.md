@@ -37,6 +37,8 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Real-time synchronization between user submissions and admin dashboard
 - [x] Removed mock data - admin now sees real user submissions only
 - [x] Added debug panel for admin to monitor data and clear requests
+- [x] Updated user dashboard to show actual submitted requests with status tracking
+- [x] Added clear messaging about localStorage limitations and demo nature
 
 ## Current Structure
 

@@ -2,6 +2,34 @@
 
 A Next.js application for managing mobile repair parts requests between technicians and administrators.
 
+## ⚠️ Demo Application Notice
+
+**This is a demonstration application** designed to showcase the user interface and workflow for a mobile repair parts management system. It uses **localStorage** for data persistence instead of a real database, which means:
+
+- ✅ **Same browser/device**: Data is shared between admin and user sessions
+- ❌ **Different browsers/devices**: Data is not shared (each browser has its own storage)
+- ❌ **Data persistence**: Data is lost if you clear browser storage or use incognito mode
+
+For a production application, you would need to implement a proper database (PostgreSQL, MongoDB, etc.) and backend API.
+
+## 🗄️ Data Storage & Sharing
+
+### How Data Sharing Works in This Demo
+
+- **Shared localStorage**: All users on the same browser/device share the same data
+- **Real-time updates**: Changes appear instantly across different tabs/windows
+- **Persistence**: Data survives browser refreshes but not storage clearing
+
+### Testing Data Sharing
+
+1. **Admin**: Login with `admin@repairbros.in` / adminpassword
+2. **User**: Open new tab, login with `yash@repairbros.in` / userpassword
+3. **Submit**: User submits a parts request
+4. **Check Admin**: Switch to admin tab - new request appears with notification
+5. **Approve**: Admin can review and approve/reject with notes
+
+**Note**: Data sharing only works within the same browser instance. For production, implement a real database with API endpoints.
+
 ## Login Credentials
 
 ### Admin Access
