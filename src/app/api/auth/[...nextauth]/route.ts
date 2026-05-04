@@ -8,15 +8,15 @@ import type { Session } from "next-auth";
 const users = [
   {
     id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
+    name: "Admin",
+    email: "admin@repairbros.in",
     password: await bcrypt.hash("adminpassword", 10), // hashed password
     role: "admin",
   },
   {
     id: "2",
-    name: "Regular User",
-    email: "user@example.com",
+    name: "Yash",
+    email: "yash@repairbros.in",
     password: await bcrypt.hash("userpassword", 10), // hashed password
     role: "user",
   },

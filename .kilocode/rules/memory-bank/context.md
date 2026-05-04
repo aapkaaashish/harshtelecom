@@ -26,6 +26,9 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Created proper home page with landing UI instead of black screen
 - [x] Made user dashboard cards clickable with navigation to dedicated pages
 - [x] Implemented fully functional repair request form with device selection, issue description, photo upload, and contact info
+- [x] Updated login credentials to use repairbros.in domain (admin@repairbros.in, yash@repairbros.in)
+- [x] Redesigned parts request form for internal technicians (no customer contact info needed)
+- [x] Added Tailwind config with proper primary color definition to fix white button styling
 
 ## Current Structure
 
