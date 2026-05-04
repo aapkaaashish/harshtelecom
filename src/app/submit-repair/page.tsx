@@ -31,24 +31,24 @@ export default function SubmitRepairPage() {
     setIsSubmitting(true);
 
     try {
-      // Add request to global state
+      // Add request to database
       const newRequest = {
         technicianName: session?.user?.name || 'Unknown',
         technicianEmail: session?.user?.email || '',
         partType: formData.partType,
         quantity: formData.quantity,
-        urgency: formData.urgency as 'low' | 'normal' | 'urgent',
+        urgency: formData.urgency,
         notes: formData.notes,
       };
 
-      addRequest(newRequest);
+      const createdRequest = await addRequest(newRequest);
 
-      // Generate request ID for confirmation
-      const id = 'PRT-' + Date.now().toString().slice(-8);
-      setRequestId(id);
+      // Use actual request ID from database
+      setRequestId(createdRequest?.id || 'Unknown');
       setIsSubmitted(true);
     } catch (error) {
       console.error('Failed to submit request:', error);
+      alert('Failed to submit request. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

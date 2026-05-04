@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 
 export interface PartsRequest {
   id: string;
@@ -8,9 +9,9 @@ export interface PartsRequest {
   technicianEmail: string;
   partType: string;
   quantity: number;
-  urgency: 'low' | 'normal' | 'urgent';
-  notes: string;
-  status: 'pending' | 'approved' | 'rejected' | 'delivered';
+  urgency: string;
+  notes?: string;
+  status: string;
   requestTime: string;
   adminNotes?: string;
   approvedTime?: string;
@@ -19,99 +20,133 @@ export interface PartsRequest {
 
 interface PartsRequestsContextType {
   requests: PartsRequest[];
-  addRequest: (request: Omit<PartsRequest, 'id' | 'status' | 'requestTime'>) => void;
-  updateRequestStatus: (id: string, status: PartsRequest['status'], adminNotes?: string) => void;
+  loading: boolean;
+  addRequest: (request: Omit<PartsRequest, 'id' | 'status' | 'requestTime'>) => Promise<PartsRequest | undefined>;
+  updateRequestStatus: (id: string, status: PartsRequest['status'], adminNotes?: string) => Promise<void>;
   getPendingCount: () => number;
-  clearAllRequests: () => void;
+  clearAllRequests: () => Promise<void>;
+  refreshRequests: () => Promise<void>;
 }
 
 const PartsRequestsContext = createContext<PartsRequestsContextType | undefined>(undefined);
 
-// Initial mock data - will be replaced by real submissions
-const initialRequests: PartsRequest[] = [];
+// Removed initial mock data - now using API
 
 export function PartsRequestsProvider({ children }: { children: ReactNode }) {
-  const [requests, setRequests] = useState<PartsRequest[]>(() => {
-    // Try to load from localStorage on mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('partsRequests');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          console.log('Loaded parts requests from localStorage:', parsed);
-          return parsed;
-        } catch (e) {
-          console.error('Failed to parse saved requests:', e);
-        }
+  const { data: session, status } = useSession();
+  const [requests, setRequests] = useState<PartsRequest[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch requests from API
+  const fetchRequests = useCallback(async () => {
+    if (!session) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch('/api/requests');
+      if (response.ok) {
+        const data = await response.json();
+        setRequests(data);
+      } else {
+        console.error('Failed to fetch requests');
       }
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+    } finally {
+      setLoading(false);
     }
-    console.log('Using initial empty requests array');
-    return initialRequests;
-  });
+  }, [session]);
 
-  // Save to localStorage whenever requests change
+  // Fetch on session change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log('Saving requests to localStorage:', requests);
-      localStorage.setItem('partsRequests', JSON.stringify(requests));
+    if (status === 'authenticated') {
+      fetchRequests();
     }
-  }, [requests]);
+  }, [status, fetchRequests]);
 
-  const addRequest = (newRequest: Omit<PartsRequest, 'id' | 'status' | 'requestTime'>) => {
-    const request: PartsRequest = {
-      ...newRequest,
-      id: 'PRT-' + Date.now().toString().slice(-8),
-      status: 'pending',
-      requestTime: new Date().toISOString(),
-    };
+  // Polling for real-time updates (every 5 seconds)
+  useEffect(() => {
+    if (status !== 'authenticated') return;
 
-    console.log('Adding new parts request:', request);
-    setRequests(prev => {
-      const newRequests = [request, ...prev];
-      console.log('Updated requests array:', newRequests);
-      return newRequests;
-    });
+    const interval = setInterval(fetchRequests, 5000);
+    return () => clearInterval(interval);
+  }, [status, fetchRequests]);
+
+  const addRequest = async (newRequest: Omit<PartsRequest, 'id' | 'status' | 'requestTime'>) => {
+    try {
+      const response = await fetch('/api/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newRequest),
+      });
+
+      if (response.ok) {
+        const createdRequest = await response.json();
+        setRequests(prev => [createdRequest, ...prev]);
+        return createdRequest;
+      } else {
+        console.error('Failed to create request');
+        throw new Error('Failed to create request');
+      }
+    } catch (error) {
+      console.error('Error creating request:', error);
+      throw error;
+    }
   };
 
-  const updateRequestStatus = (id: string, status: PartsRequest['status'], adminNotes?: string) => {
-    setRequests(prev => prev.map(request => {
-      if (request.id === id) {
-        const update: Partial<PartsRequest> = {
-          status,
-          adminNotes,
-        };
+  const updateRequestStatus = async (id: string, status: PartsRequest['status'], adminNotes?: string) => {
+    try {
+      const response = await fetch(`/api/requests/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status, adminNotes }),
+      });
 
-        if (status === 'approved') {
-          update.approvedTime = new Date().toISOString();
-        } else if (status === 'rejected') {
-          update.rejectedTime = new Date().toISOString();
-        }
-
-        return { ...request, ...update };
+      if (response.ok) {
+        const updatedRequest = await response.json();
+        setRequests(prev => prev.map(request =>
+          request.id === id ? updatedRequest : request
+        ));
+      } else {
+        console.error('Failed to update request status');
       }
-      return request;
-    }));
+    } catch (error) {
+      console.error('Error updating request status:', error);
+    }
   };
 
   const getPendingCount = () => {
     return requests.filter(r => r.status === 'pending').length;
   };
 
-  const clearAllRequests = () => {
-    console.log('Clearing all requests');
-    setRequests([]);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('partsRequests');
+  const clearAllRequests = async () => {
+    // For admin only - delete all requests
+    try {
+      const deletePromises = requests.map(request =>
+        fetch(`/api/requests/${request.id}`, { method: 'DELETE' })
+      );
+      await Promise.all(deletePromises);
+      setRequests([]);
+    } catch (error) {
+      console.error('Error clearing requests:', error);
+      // Fallback to local clear
+      setRequests([]);
     }
   };
 
   return (
     <PartsRequestsContext.Provider value={{
       requests,
+      loading,
       addRequest,
       updateRequestStatus,
       getPendingCount,
       clearAllRequests,
+      refreshRequests: fetchRequests,
     }}>
       {children}
     </PartsRequestsContext.Provider>
