@@ -37,85 +37,87 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="text-center h3 font-bold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or <a href="#" className="font-medium text-primary hover:underline">
-              continue with email
-            </a>
-          </p>
-        </div>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <div className="mt-1">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
+        <div className="w-full space-y-8 overflow-hidden">
+          <div className="space-y-6 text-center">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Mobile Repair Hub
+            </h2>
+            <p className="text-lg text-gray-600">
+              Sign in to manage your repair requests and inventory
+            </p>
+          </div>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
               <input id="email" name="email" type="email" required
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                className="appearance-none block w-full px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-400 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
               />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="mt-1">
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <input id="password" name="password" type="password" required
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                className="appearance-none block w-full px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-400 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
               />
             </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <input id="remember-me" name="remember-me" type="checkbox"
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded transition-all duration-200"
                 />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="remember-me" className="text-gray-600">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Remember me
                 </label>
               </div>
+              <div className="text-sm">
+                <a href="#" className="font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                  Forgot password?
+                </a>
+              </div>
             </div>
-            <div className="text-sm">
-              <a href="#" className="font-medium text-primary hover:underline">
-                Forgot password?
-              </a>
+
+            <div>
+              <button type="submit" disabled={loading}
+                className="group w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200">
+                {loading ? (
+                  <>
+                    Signing in...
+                    <svg className="ml-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  </>
+                ) : 'Sign in'}
+              </button>
             </div>
-          </div>
+          </form>
 
-          <div className="flex">
-            <button type="submit" disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
+          {error && (
+            <p className="mt-2 text-sm text-red-600">
+              {error}
+            </p>
+          )}
 
-        {error && (
-          <p className="mt-2 text-sm text-red-600">
-            {error}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Don&apos;t have an account?
+            <a href="#" className="font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+              Sign up
+            </a>
           </p>
-        )}
-
-        <p className="mt-4 text-center text-sm text-gray-500">
-          Don&apos;t have an account?
-          <a href="#" className="font-medium text-primary hover:underline">
-            Sign up
-          </a>
-        </p>
+        </div>
       </div>
     </div>
   );
